@@ -1,0 +1,29 @@
+PROJE SPESİFİKASYONU: S12 Acil Durum Botu
+
+1. MİMARİ BİLEŞENLER
+- bot.py: Kullanıcı girdisini alır, filtreler ve HOOTL/HOTL kararı verir.
+- operator.py: Sonsuz döngüde çalışır, 2 saniyelik (time.sleep) aralıklarla kuyruk.txt dosyasını kontrol eder.
+- bilgi.txt: HOOTL modu için pipe ("|") işareti ile ayrılmış anahtar-değer çiftlerini tutar (Örn: alev|tavada yağ alev aldıysa...).
+- kuyruk.txt: İnsana havale edilecek riskli çağrıların kaydedildiği ve okunduktan sonra sıfırlandığı tampon (buffer) dosyasıdır.
+
+2. ÇALIŞMA MODLARI VE TETİKLEYİCİLER (TRIGGERS)
+Sistem 3 temel modda çalışır:
+
+MOD 1: HOTL (İnsana Havale / Acil Durum)
+- Tetikleyiciler (Riskli Kelimeler): "yaralı", "baygın", "patlama", "büyük alev", "mahsur", "nefes", "çocuk", "kanama"
+- Davranış: Kullanıcı girdisi bu kelimelerden herhangi birini içeriyorsa, bot risk_durumu = True bayrağını kaldırır. 
+- Eylem: Kullanıcıya "Hayati tehlike algıladım! Sizi operatöre bağlıyorum..." uyarısı verilir. Orijinal mesaj append ("a") moduyla kuyruk.txt dosyasına yazılır. Operatör çağrıyı okur ve dosyayı write ("w") moduyla temizler.
+
+MOD 2: HOOTL (Otomatik Tavsiye)
+- Tetikleyiciler: Riskli kelime içermeyen ancak bilgi.txt dosyasında karşılığı bulunan kelimeler (örn: "gaz kokusu", "tava alev").
+- Davranış: risk_durumu = False kalır. Bot, bilgi.txt dosyasını okur.
+- Eylem: Cevap bulunduğunda, okunabilirliği artırmak için `\nBot: ` formatıyla kullanıcıya uzman tavsiyesi iletilir. Operatör terminaline hiçbir veri gönderilmez.
+
+MOD 3: Fallback (Anlaşılamayan Durum)
+- Tetikleyiciler: Girdinin ne riskli kelimeler listesinde ne de bilgi.txt dosyasında bulunamaması.
+- Davranış: risk_durumu = False ve cevap_bulundu = False bayraklarının ikisi de tetiklenmez.
+- Eylem: Bot, "Üzgünüm, bu durumu anlayamadım. Lütfen daha açık tarif edin." standart güvenlik mesajını döndürür.
+
+3. KULLANICI DENEYİMİ (UX) VE ÇIKIŞ
+- Döngü kontrolü: Kullanıcı terminale "kapat" yazana kadar bot yeni sorunları dinlemeye devam eder.
+- Metin formatlama: .strip() ve .lower() fonksiyonları ile kullanıcı girdilerindeki büyük/küçük harf tutarsızlıkları ve gereksiz boşluklar tolere edilir.
